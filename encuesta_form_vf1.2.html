@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Encuesta Viaje 2027</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; background: #f5f0e8; padding: 16px; color: #0D2340; }
+
+h1 { font-size: 20px; text-align: center; margin-bottom: 6px; color: #0D2340; }
+.subtitulo { font-size: 13px; text-align: center; color: #6B7280; margin-bottom: 4px; }
+.subtitulo2 { font-size: 14px; text-align: center; font-weight: bold; color: #0D2340; margin-bottom: 20px; }
+.linea-dorada { width: 50px; height: 3px; background: #C9A84C; margin: 10px auto 14px; border-radius: 2px; }
+
+.card { background: #fff; border-radius: 10px; padding: 16px; margin-bottom: 14px; border: 1px solid #D9D3C7; }
+.label-sec { font-size: 10px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; color: #C9A84C; margin-bottom: 12px; display: block; }
+
+.campo { margin-bottom: 14px; }
+.campo label { display: block; font-size: 12px; color: #6B7280; margin-bottom: 5px; }
+.campo input[type=text] { width: 100%; padding: 10px 12px; border: 1.5px solid #D9D3C7; border-radius: 8px; font-size: 15px; background: #f5f0e8; color: #0D2340; -webkit-appearance: none; }
+
+/* INFO VIAJE */
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px; }
+@media(max-width: 420px) { .info-grid { grid-template-columns: 1fr; } }
+.info-box { border: 1px solid #D9D3C7; border-radius: 8px; padding: 12px; }
+.info-box h3 { font-size: 14px; margin-bottom: 8px; }
+.info-box ul { list-style: none; margin-bottom: 8px; }
+.info-box ul li { font-size: 12px; color: #6B7280; padding: 2px 0; }
+.info-box ul li::before { content: "✓ "; color: #2D6A4F; font-weight: bold; }
+.costos { border-top: 1px solid #D9D3C7; padding-top: 8px; margin-top: 6px; }
+.costos p { font-size: 12px; color: #6B7280; margin-bottom: 2px; }
+.costos p b { color: #0D2340; }
+
+/* BOTONES SELECCION */
+.opciones { display: flex; flex-direction: column; gap: 10px; }
+.op-btn {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid #D9D3C7;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 15px;
+  font-family: Arial, sans-serif;
+  color: #0D2340;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+}
+.op-btn.sel { border-color: #0D2340; background: #eef1f5; font-weight: bold; }
+.circulo {
+  width: 22px; height: 22px;
+  border: 2px solid #D9D3C7;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+.op-btn.sel .circulo { border-color: #0D2340; background: #0D2340; }
+.punto { width: 10px; height: 10px; border-radius: 50%; background: #fff; display: none; }
+.op-btn.sel .punto { display: block; }
+
+.op-row { display: flex; gap: 10px; }
+.op-row .op-btn { flex: 1; justify-content: center; }
+
+/* DESTINOS */
+.destinos { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee; }
+.dest-label { font-size: 12px; color: #6B7280; margin-bottom: 8px; font-weight: bold; }
+
+/* ENVIAR */
+.btn-enviar {
+  width: 100%;
+  max-width: 680px;
+  display: block;
+  margin: 20px auto 0;
+  padding: 18px;
+  background: #0D2340;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 18px;
+  font-family: Arial, sans-serif;
+  cursor: pointer;
+  -webkit-tap-highlight-color: rgba(0,0,0,0.2);
+}
+.btn-enviar:disabled { opacity: 0.5; }
+
+/* ÉXITO */
+.exito { display: none; text-align: center; padding: 40px 20px; background: #fff; border-radius: 10px; margin-top: 20px; }
+.exito .ico { font-size: 56px; margin-bottom: 12px; }
+.exito h2 { font-size: 22px; margin-bottom: 8px; }
+.exito p { font-size: 14px; color: #6B7280; }
+.btn-otro { margin-top: 20px; padding: 12px 24px; border: 1.5px solid #0D2340; border-radius: 8px; background: transparent; color: #0D2340; font-size: 14px; cursor: pointer; }
+
+/* AVISO */
+.aviso {
+  display: none;
+  position: fixed;
+  top: 16px; left: 50%;
+  transform: translateX(-50%);
+  background: #1a1a1a;
+  color: #fff;
+  padding: 14px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  max-width: 88vw;
+  text-align: center;
+  z-index: 9999;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+</style>
+</head>
+<body>
+
+<h1>Encuesta — Viaje de Promoción 2027</h1>
+<div class="linea-dorada"></div>
+<p class="subtitulo">1era encuesta en donde se obtendrá la información estimada de las niñas que participarán en el viaje de promoción.</p>
+<p class="subtitulo2">Posteriormente convocaremos a una reunión presencial con los proveedores (agencias) para las explicaciones detalladas del destino elegido y todo lo que incluye.</p>
+
+<div id="form-wrap">
+
+  <!-- DATOS -->
+  <div class="card">
+    <span class="label-sec">Datos del padre / madre y alumna</span>
+    <div class="campo">
+      <label>Apellidos y nombres de la alumna *</label>
+      <input type="text" id="alumna" placeholder="Ej. García Ramírez, Lucía">
+    </div>
+    <div class="campo">
+      <label>Sección *</label>
+      <div class="op-row">
+        <button type="button" class="op-btn" id="sec-A" onclick="selSec('A')">
+          <span class="circulo"><span class="punto"></span></span> Sección A
+        </button>
+        <button type="button" class="op-btn" id="sec-B" onclick="selSec('B')">
+          <span class="circulo"><span class="punto"></span></span> Sección B
+        </button>
+      </div>
+    </div>
+    <div class="campo">
+      <label>Apellidos y nombres del padre</label>
+      <input type="text" id="padre" placeholder="Ej. García López, Roberto">
+    </div>
+    <div class="campo" style="margin-bottom:0">
+      <label>Apellidos y nombres de la madre</label>
+      <input type="text" id="madre" placeholder="Ej. Ramírez de García, María">
+    </div>
+  </div>
+
+  <!-- INFO -->
+  <div class="card">
+    <span class="label-sec">Opciones de viaje — qué incluye</span>
+    <div class="info-grid">
+      <div class="info-box">
+        <h3>✈️ Viaje al extranjero</h3>
+        <ul>
+          <li>Alimentación Buffet</li>
+          <li>Transporte — aerolínea</li>
+          <li>Alojamiento — hotel</li>
+          <li>Actividades — tours</li>
+          <li>Mes: <b>Octubre</b></li>
+        </ul>
+        <div class="costos">
+          <p>🗺️ Cartagena: <b>US$ 1,290</b></p>
+          <p>🌴 San Andrés: <b>US$ 1,390</b></p>
+          <p>🌊 Punta Cana: <b>US$ 1,895</b></p>
+        </div>
+      </div>
+      <div class="info-box">
+        <h3>🏖️ Viaje nacional</h3>
+        <ul>
+          <li>Alimentación Buffet</li>
+          <li>Transporte — aerolínea</li>
+          <li>Alojamiento — hotel</li>
+          <li>Actividades — tours</li>
+          <li>Mes: <b>Octubre</b></li>
+        </ul>
+        <div class="costos">
+          <p>🏖️ Punta Sal: <b>US$ 1,095</b></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PARTICIPACIÓN -->
+  <div class="card">
+    <span class="label-sec">¿Desea participar en el viaje? *</span>
+    <div class="opciones">
+      <button type="button" class="op-btn" id="p-ext" onclick="selPart('extranjero')">
+        <span class="circulo"><span class="punto"></span></span>
+        ✈️ Sí, viaje al extranjero
+      </button>
+      <button type="button" class="op-btn" id="p-nac" onclick="selPart('nacional')">
+        <span class="circulo"><span class="punto"></span></span>
+        🏖️ Sí, viaje nacional
+      </button>
+      <button type="button" class="op-btn" id="p-no" onclick="selPart('no')">
+        <span class="circulo"><span class="punto"></span></span>
+        ❌ No deseo participar
+      </button>
+    </div>
+
+    <!-- destinos extranjero -->
+    <div id="dest-ext" class="destinos">
+      <div class="dest-label">Destino de preferencia — extranjero: *</div>
+      <div class="opciones">
+        <button type="button" class="op-btn" id="d-car" onclick="selDest('Cartagena','d-car')">
+          <span class="circulo"><span class="punto"></span></span>
+          🗺️ Cartagena &nbsp;<span style="font-size:12px;color:#6B7280">US$ 1,290</span>
+        </button>
+        <button type="button" class="op-btn" id="d-san" onclick="selDest('San Andrés','d-san')">
+          <span class="circulo"><span class="punto"></span></span>
+          🌴 San Andrés &nbsp;<span style="font-size:12px;color:#6B7280">US$ 1,390</span>
+        </button>
+        <button type="button" class="op-btn" id="d-pca" onclick="selDest('Punta Cana','d-pca')">
+          <span class="circulo"><span class="punto"></span></span>
+          🌊 Punta Cana &nbsp;<span style="font-size:12px;color:#6B7280">US$ 1,895</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- destinos nacional -->
+    <div id="dest-nac" class="destinos">
+      <div class="dest-label">Destino de preferencia — nacional: *</div>
+      <div class="opciones">
+        <button type="button" class="op-btn sel" id="d-psa" onclick="selDest('Punta Sal','d-psa')">
+          <span class="circulo"><span class="punto"></span></span>
+          🏖️ Punta Sal &nbsp;<span style="font-size:12px;color:#6B7280">US$ 1,095</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <button type="button" class="btn-enviar" id="btn-send" onclick="enviar()">Enviar encuesta →</button>
+
+</div><!-- /form-wrap -->
+
+<!-- ÉXITO -->
+<div class="exito" id="exito">
+  <div class="ico">✅</div>
+  <h2>¡Gracias por responder!</h2>
+  <p>Su respuesta ha sido registrada correctamente.<br>El comité de promoción se comunicará con usted pronto.</p>
+  <button type="button" class="btn-otro" onclick="reiniciar()">Registrar otra respuesta</button>
+</div>
+
+<div class="aviso" id="aviso"></div>
+
+<script>
+var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxHfwFus5NMuAaNYrOsgcNxVn9MGvJHL5a3EvxTTXU_Aqa5-l12mpfeYJZtBLOuEUbscQ/exec";
+
+var vSec  = "";
+var vPart = "";
+var vDest = "";
+var destIds = ["d-car","d-san","d-pca","d-psa"];
+
+function selSec(v) {
+  vSec = v;
+  document.getElementById("sec-A").className = "op-btn" + (v=="A"?" sel":"");
+  document.getElementById("sec-B").className = "op-btn" + (v=="B"?" sel":"");
+}
+
+function selPart(v) {
+  vPart = v;
+  vDest = "";
+  document.getElementById("p-ext").className = "op-btn" + (v=="extranjero"?" sel":"");
+  document.getElementById("p-nac").className = "op-btn" + (v=="nacional"?" sel":"");
+  document.getElementById("p-no").className  = "op-btn" + (v=="no"?" sel":"");
+  document.getElementById("dest-ext").style.display = (v=="extranjero") ? "block" : "none";
+  document.getElementById("dest-nac").style.display = (v=="nacional")   ? "block" : "none";
+  // Punta Sal se auto-selecciona en nacional
+  if (v=="nacional") { selDest("Punta Sal","d-psa"); }
+  else { for(var i=0;i<destIds.length;i++){ var e=document.getElementById(destIds[i]); if(e) e.className="op-btn"; } }
+}
+
+function selDest(v, id) {
+  vDest = v;
+  for(var i=0;i<destIds.length;i++){
+    var e = document.getElementById(destIds[i]);
+    if(e) e.className = "op-btn" + (destIds[i]==id?" sel":"");
+  }
+}
+
+function mostrarAviso(msg) {
+  var el = document.getElementById("aviso");
+  el.textContent = msg;
+  el.style.display = "block";
+  setTimeout(function(){ el.style.display = "none"; }, 3500);
+}
+
+function enviar() {
+  var alumna = document.getElementById("alumna").value.trim();
+  if (!alumna)  { mostrarAviso("⚠️ Ingresa el nombre de la alumna"); window.scrollTo(0,0); return; }
+  if (!vSec)    { mostrarAviso("⚠️ Selecciona la sección de la alumna"); window.scrollTo(0,0); return; }
+  if (!vPart)   { mostrarAviso("⚠️ Indica si deseas participar en el viaje"); return; }
+  if ((vPart=="extranjero"||vPart=="nacional") && !vDest) { mostrarAviso("⚠️ Selecciona un destino de preferencia"); return; }
+
+  var btn = document.getElementById("btn-send");
+  btn.disabled = true;
+  btn.textContent = "Enviando…";
+
+  var datos = JSON.stringify({
+    alumna:        alumna,
+    seccion:       vSec,
+    padre:         document.getElementById("padre").value.trim(),
+    madre:         document.getElementById("madre").value.trim(),
+    participacion: vPart,
+    destino:       vPart=="no" ? "No participa" : vDest
+  });
+
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", SCRIPT_URL, true);
+  xhr.setRequestHeader("Content-Type","text/plain");
+  xhr.timeout = 12000;
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState == 4) { mostrarExito(); }
+  };
+  xhr.ontimeout = function() { mostrarExito(); };
+  xhr.onerror   = function() { mostrarExito(); };
+  xhr.send(datos);
+}
+
+function mostrarExito() {
+  document.getElementById("form-wrap").style.display = "none";
+  document.getElementById("exito").style.display = "block";
+  window.scrollTo(0,0);
+}
+
+function reiniciar() {
+  document.getElementById("alumna").value = "";
+  document.getElementById("padre").value  = "";
+  document.getElementById("madre").value  = "";
+  vSec=""; vPart=""; vDest="";
+  var todos = document.querySelectorAll(".op-btn");
+  for(var i=0;i<todos.length;i++) todos[i].className="op-btn";
+  document.getElementById("dest-ext").style.display = "none";
+  document.getElementById("dest-nac").style.display = "none";
+  document.getElementById("btn-send").disabled = false;
+  document.getElementById("btn-send").textContent = "Enviar encuesta →";
+  document.getElementById("form-wrap").style.display = "block";
+  document.getElementById("exito").style.display = "none";
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
